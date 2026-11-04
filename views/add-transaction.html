@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <link rel="stylesheet" href="/css/main.css" />
+    <meta charset="UTF-8" />
+    <title>Expense Tracker</title>
+  </head>
+  <body>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="/" class="nav-link">Home</a>
+      <a href="/add-transaction" class="nav-link active"> Add Transaction </a>
+    </nav>
+    <form action="/transactions" method="POST">
+      <label for="amount">Amount</label>
+      <input type="number" id="amount" name="amount" required />
+      <label for="category">Category</label>
+      <input type="text" id="category" name="category" required />
+      <button type="submit">Submit</button>
+    </form>
+  </body>
+</html>

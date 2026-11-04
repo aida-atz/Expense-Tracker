@@ -1,0 +1,11 @@
+extends layout 
+block content
+    ul
+        if transactions.length!=0
+            each transaction in transactions
+                li
+                    span= transaction.category 
+                    span -  
+                    span= transaction.amount
+        else
+            li No transactions yet

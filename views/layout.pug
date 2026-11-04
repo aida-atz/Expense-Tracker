@@ -1,0 +1,13 @@
+doctype html
+html(lang="en")
+    head
+        link(rel="stylesheet" href="/css/main.css")
+        meta(charset="UTF-8")
+        title= pageTitle
+    body
+        nav( class="main-nav" aria-label="Main navigation")
+            a.nav-link(href="/" class=(activePage === "home"?"active":"")) Home
+            a.nav-link(href="/add-transaction" class=(activePage === "add-transaction"?"active":"")) Add Transaction
+            a.nav-link(href="/transactions/view" class=(activePage === "transactions"?"active":"")) Transactions
+        h1=pageTitle
+        block content
