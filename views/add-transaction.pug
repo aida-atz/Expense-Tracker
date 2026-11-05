@@ -1,8 +1,0 @@
-extends layout 
-block content
-    form(action="/transactions" method="POST")
-        label(for="amount") Amount 
-        input(type="number" id="amount" name="amount" required)
-        label(for="category") Category 
-        input(type="text" id="category" name="category" required)
-        button(type="submit") Submit 

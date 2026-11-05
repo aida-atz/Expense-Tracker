@@ -1,0 +1,11 @@
+<ul>
+    {{#each transactions}}
+        <li>
+            <span>{{this.category}}</span>
+            <span> - </span>
+            <span>{{this.amount}}</span>
+        </li>
+    {{else}}
+        <li>No transactions yet</li>
+    {{/each}}
+</ul>
