@@ -1,23 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const transactions = [];
+const {
+  addTransaction,
+  getTransactions,
+  deleteTransaction,
+} = require("../controllers/transactions.cjs");
 
-router.get("/", (req, res) => {
-  res.json(transactions);
-});
-router.post("/", (req, res) => {
-  console.log(req.body.amount, req.body.category);
-  transactions.push({
-    amount: req.body.amount,
-    category: req.body.category,
-  });
-  res.send("Transaction Received");
-});
-router.get("/view", (req, res) => {
-  res.render("transactions", {
-    pageTitle: "Transactions",
-    transactions,
-    activePage: "transactions",
-  });
-});
+router.get("/", getTransactions);
+router.post("/", addTransaction);
+router.delete("/", deleteTransaction);
+
 module.exports = router;

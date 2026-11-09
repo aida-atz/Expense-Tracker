@@ -3,6 +3,8 @@ const path = require("node:path");
 const parentDir = require("./utils/path.cjs");
 const app = express();
 const transactionsRouter = require("./routes/transactions.cjs");
+const categoriesRouter = require("./routes/categories.cjs");
+const { notFound, errorHandler } = require("./controllers/errors.cjs");
 const { engine } = require("express-handlebars");
 app.engine(
   "hbs",
@@ -18,16 +20,9 @@ app.set("view engine", "hbs");
 app.use(express.urlencoded({ extended: false }));
 // Use express.static middleware to serve static files from the "public" folder
 app.use(express.static(path.join(parentDir, "public")));
-app.use((req, res, next) => {
-  console.log(req.url, req.method);
-  next();
-});
-app.use("/transactions", (req, res, next) => {
-  console.log("Transactions Middleware");
-  next();
-});
+app.use(express.json());
 app.use("/transactions", transactionsRouter);
-
+app.use("/categories", categoriesRouter);
 app.get("/", (req, res) => {
   res.render("home", {
     pageTitle: "Expense Tracker",
@@ -52,12 +47,23 @@ app.get("/test-hbs", (req, res) => {
     pageTitle: "Handlebars in Expense Tracker",
   });
 });
-app.use((req, res) => {
-  res.status(404);
-  res.render("404", {
-    pageTitle: "",
+app.get("/test-ejs", (req, res) => {
+  res.render("ejs-demo.ejs", {
+    pageTitle: "EJS Test",
+    categories: [
+      {
+        id: 1,
+        name: "food",
+      },
+      {
+        id: 2,
+        name: "services",
+      },
+    ],
   });
 });
+app.use(notFound);
+app.use(errorHandler);
 app.listen(3000, () => {
   console.log("Express Server Running");
 });
