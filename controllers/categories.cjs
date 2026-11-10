@@ -2,11 +2,12 @@ const {
   getAllCategories,
   createCategory,
   removeCategory,
+  getCategoryById,
 } = require("../models/category.cjs");
 const AppError = require("../utils/AppError.cjs");
 async function getCategories(req, res) {
   const categories = await getAllCategories();
-  res.status(200).json(categories);
+  res.status(200).json({ status: "success", data: { categories } });
 }
 async function addCategory(req, res) {
   const { name, type } = req.body;
@@ -23,13 +24,16 @@ async function addCategory(req, res) {
   }
   const trimmedName = name.trim();
   const category = await createCategory(trimmedName, type);
-  res.status(201).json(category);
+  res.status(201).json({ status: "success", data: { category } });
 }
 async function deleteCategory(req, res) {
-  console.log(req);
-
-  const { categoryId } = req.body;
+  const categoryId = req.params.id;
   const category = await removeCategory(categoryId);
   res.status(200).json({ status: "success", data: { category } });
 }
-module.exports = { getCategories, addCategory, deleteCategory };
+async function getCategory(req, res) {
+  const categoryId = req.params.id;
+  const category = await getCategoryById(categoryId);
+  res.status(200).json({ status: "success", data: { category } });
+}
+module.exports = { getCategories, addCategory, deleteCategory, getCategory };

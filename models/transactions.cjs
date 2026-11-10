@@ -1,20 +1,48 @@
 const prisma = require("../config/prisma.cjs");
-async function getAllTransactions() {
-  const transactions = await prisma.transaction.findMany();
-  return transactions;
-}
-async function createTransaction(amount, type, categoryId, description) {
-  const transaction = await prisma.transaction.create({
-    data: { amount, type, categoryId, description },
+async function getAllTransactions(type) {
+  return prisma.transaction.findMany({
+    where: type
+      ? {
+          category: {
+            is: {
+              type,
+            },
+          },
+        }
+      : {},
   });
-  return transaction;
+}
+async function createTransaction(amount, categoryId, description) {
+  return prisma.transaction.create({
+    data: { amount, categoryId, description },
+  });
 }
 async function removeTransaction(transactionId) {
-  const transaction = await prisma.transaction.delete({
+  return prisma.transaction.delete({
     where: {
       id: transactionId,
     },
   });
-  return transaction;
 }
-module.exports = { getAllTransactions, createTransaction, removeTransaction };
+async function getTransactionById(transactionId) {
+  return prisma.transaction.findUnique({
+    where: {
+      id: transactionId,
+    },
+  });
+}
+async function updateTransactionById(transactionId, data) {
+  return prisma.transaction.update({
+    where: {
+      id: transactionId,
+    },
+    data,
+  });
+}
+module.exports = {
+  getAllTransactions,
+  createTransaction,
+  removeTransaction,
+  getTransactionById,
+  updateTransactionById,
+};

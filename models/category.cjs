@@ -17,4 +17,20 @@ async function removeCategory(categoryId) {
   });
   return category;
 }
-module.exports = { getAllCategories, createCategory, removeCategory };
+async function getCategoryById(categoryId) {
+  const category = await prisma.category.findUnique({
+    where: {
+      id: categoryId,
+    },
+    include: {
+      transactions: true,
+    },
+  });
+  return category;
+}
+module.exports = {
+  getAllCategories,
+  createCategory,
+  removeCategory,
+  getCategoryById,
+};
