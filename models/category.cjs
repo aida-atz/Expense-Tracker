@@ -9,28 +9,41 @@ async function createCategory(name, type) {
   });
   return category;
 }
-async function removeCategory(categoryId) {
-  const category = await prisma.category.delete({
+async function setCategoryArchived(categoryId, isArchived) {
+  return prisma.category.update({
     where: {
       id: categoryId,
     },
+    data: {
+      isArchived,
+    },
   });
-  return category;
 }
-async function getCategoryById(categoryId) {
+async function getCategoryById(categoryId, withTransactions = false) {
   const category = await prisma.category.findUnique({
     where: {
       id: categoryId,
     },
+
     include: {
-      transactions: true,
+      ...(withTransactions && { transaction: true }),
     },
   });
   return category;
 }
+async function updateCategoryById(categoryId, data) {
+  return prisma.category.update({
+    where: {
+      id: categoryId,
+    },
+    data,
+  });
+}
+
 module.exports = {
   getAllCategories,
   createCategory,
-  removeCategory,
+  setCategoryArchived,
   getCategoryById,
+  updateCategoryById,
 };

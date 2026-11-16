@@ -11,7 +11,7 @@ function errorHandler(err, req, res, next) {
     return;
   }
   if (err.code == "P2025") {
-    res.status(400).json({
+    res.status(404).json({
       success: false,
       message: "Resource not found",
     });

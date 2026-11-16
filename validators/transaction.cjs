@@ -1,5 +1,6 @@
 const { body, param, query } = require("express-validator");
 const validTypes = ["INCOME", "EXPENSE"];
+
 const transactionIdValidator = [
   param("id").isUUID().withMessage("Invalid transaction ID"),
 ];

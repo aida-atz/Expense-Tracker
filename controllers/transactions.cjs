@@ -1,19 +1,25 @@
 const {
-  createTransaction,
-  getAllTransactions,
-  removeTransaction,
-  getTransactionById,
-  updateTransactionById,
-} = require("../models/transactions.cjs");
-const AppError = require("../utils/AppError.cjs");
+  getTransactionsService,
+  getTransactionService,
+  addTransactionService,
+  deleteTransactionService,
+  updateTransactionService,
+} = require("../services/transactions.cjs");
 async function addTransaction(req, res) {
   const { amount, categoryId, description } = req.body;
-  const transaction = await createTransaction(amount, categoryId, description);
-  res.status(201).json(transaction);
+  const transaction = await addTransactionService(
+    amount,
+    categoryId,
+    description,
+  );
+  res.status(201).json({
+    status: "success",
+    data: { transaction },
+  });
 }
 async function getTransactions(req, res) {
   const { type } = req.query;
-  const transactions = await getAllTransactions(type);
+  const transactions = await getTransactionsService(type);
   res.status(200).json({
     status: "success",
     data: {
@@ -23,29 +29,23 @@ async function getTransactions(req, res) {
 }
 async function deleteTransaction(req, res) {
   const transactionId = req.params.id;
-  const transaction = await removeTransaction(transactionId);
-  console.log(transaction);
+  const transaction = await deleteTransactionService(transactionId);
   res.status(200).json({ status: "success", data: { transaction } });
 }
 async function getTransaction(req, res) {
   const transactionId = req.params.id;
-  const transaction = await getTransactionById(transactionId);
-  if (!transaction) {
-    const error = new AppError("Transaction not found.", 404);
-    throw error;
-  }
+  const transaction = await getTransactionService(transactionId);
   res.status(200).json({ status: "success", data: { transaction } });
 }
 async function updateTransaction(req, res) {
   const transactionId = req.params.id;
   const { amount, categoryId, description } = req.body;
-
-  const data = {
-    ...(amount !== undefined && { amount }),
-    ...(categoryId !== undefined && { categoryId }),
-    ...(description !== undefined && { description }),
-  };
-  const updatedTransaction = await updateTransactionById(transactionId, data);
+  const updatedTransaction = await updateTransactionService(
+    categoryId,
+    transactionId,
+    amount,
+    description,
+  );
   res
     .status(200)
     .json({ status: "success", data: { transaction: updatedTransaction } });
