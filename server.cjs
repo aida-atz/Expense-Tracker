@@ -4,12 +4,14 @@ const parentDir = require("./utils/path.cjs");
 const app = express();
 const transactionsRouter = require("./routes/transactions.cjs");
 const categoriesRouter = require("./routes/categories.cjs");
+const authRouter = require("./routes/auth.cjs");
 const { notFound, errorHandler } = require("./controllers/errors.cjs");
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use("/transactions", transactionsRouter);
 app.use("/categories", categoriesRouter);
+app.use("/auth", authRouter);
 app.get("/", (req, res) => {
   res.render("home", {
     pageTitle: "Expense Tracker",
@@ -23,7 +25,7 @@ app.get("/add-transaction", (req, res) => {
   });
 });
 app.use((req, res, next) => {
-  console.log("After Transactions Route");
+  console.log("Incoming request:", req.method, req.originalUrl);
   next();
 });
 app.get("/budgets", (req, res) => {

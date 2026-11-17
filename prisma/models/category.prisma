@@ -4,6 +4,9 @@ model Category{
   type TransactionType
   isDefault Boolean @default(false)
   isArchived Boolean @default(false)
+  userId String? @db.Uuid
   createdAt DateTime @default(now())
   transactions Transaction[]
+  user User? @relation(fields: [userId],references: [id])
+  @@index([userId])
 }

@@ -1,4 +1,4 @@
-const { body, param } = require("express-validator");
+const { body, param, checkExact } = require("express-validator");
 const categoryIdValidator = [
   param("id").isUUID().withMessage("Invalid category id."),
 ];

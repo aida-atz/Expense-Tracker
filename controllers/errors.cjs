@@ -10,6 +10,13 @@ function errorHandler(err, req, res, next) {
     });
     return;
   }
+  if (err.code === "P2002") {
+    res.status(409).json({
+      success: false,
+      message: "A resource with this value already exists",
+    });
+    return;
+  }
   if (err.code == "P2025") {
     res.status(404).json({
       success: false,
