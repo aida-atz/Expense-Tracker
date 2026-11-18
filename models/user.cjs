@@ -12,6 +12,10 @@ async function createUser(email, passwordHash) {
     },
   });
 }
+async function getUserByEmail(email) {
+  return prisma.user.findUnique({ where: { email } });
+}
 module.exports = {
   createUser,
+  getUserByEmail,
 };
