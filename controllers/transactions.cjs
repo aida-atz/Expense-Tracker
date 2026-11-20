@@ -7,10 +7,12 @@ const {
 } = require("../services/transactions.cjs");
 async function addTransaction(req, res) {
   const { amount, categoryId, description } = req.body;
+  const userId = req.user.id;
   const transaction = await addTransactionService(
     amount,
     categoryId,
     description,
+    userId,
   );
   res.status(201).json({
     status: "success",
@@ -19,7 +21,8 @@ async function addTransaction(req, res) {
 }
 async function getTransactions(req, res) {
   const { type } = req.query;
-  const transactions = await getTransactionsService(type);
+  const userId = req.user.id;
+  const transactions = await getTransactionsService(type, userId);
   res.status(200).json({
     status: "success",
     data: {
@@ -29,22 +32,26 @@ async function getTransactions(req, res) {
 }
 async function deleteTransaction(req, res) {
   const transactionId = req.params.id;
-  const transaction = await deleteTransactionService(transactionId);
+  const userId = req.user.id;
+  const transaction = await deleteTransactionService(transactionId, userId);
   res.status(200).json({ status: "success", data: { transaction } });
 }
 async function getTransaction(req, res) {
   const transactionId = req.params.id;
-  const transaction = await getTransactionService(transactionId);
+  const userId = req.user.id;
+  const transaction = await getTransactionService(transactionId, userId);
   res.status(200).json({ status: "success", data: { transaction } });
 }
 async function updateTransaction(req, res) {
   const transactionId = req.params.id;
+  const userId = req.user.id;
   const { amount, categoryId, description } = req.body;
   const updatedTransaction = await updateTransactionService(
     categoryId,
     transactionId,
     amount,
     description,
+    userId,
   );
   res
     .status(200)

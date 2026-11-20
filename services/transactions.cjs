@@ -7,24 +7,29 @@ const {
   createTransaction,
 } = require("../models/transactions.cjs");
 const { validateActiveCategory } = require("./categories.cjs");
-async function getTransactionsService(type) {
-  const transactions = await getAllTransactions(type);
+async function getTransactionsService(type, userId) {
+  const transactions = await getAllTransactions(type, userId);
   return transactions;
 }
-async function getTransactionService(transactionId) {
-  const transaction = await getTransactionById(transactionId);
+async function getTransactionService(transactionId, userId) {
+  const transaction = await getTransactionById(transactionId, userId);
   if (!transaction) {
     throw new AppError("Transaction not found.", 404);
   }
   return transaction;
 }
-async function addTransactionService(amount, categoryId, description) {
+async function addTransactionService(amount, categoryId, description, userId) {
   if (categoryId) await validateActiveCategory(categoryId);
-  const transaction = await createTransaction(amount, categoryId, description);
+  const transaction = await createTransaction(
+    amount,
+    categoryId,
+    description,
+    userId,
+  );
   return transaction;
 }
-async function deleteTransactionService(transactionId) {
-  const removedtransaction = await removeTransaction(transactionId);
+async function deleteTransactionService(transactionId, userId) {
+  const removedtransaction = await removeTransaction(transactionId, userId);
   return removedtransaction;
 }
 async function updateTransactionService(
@@ -32,6 +37,7 @@ async function updateTransactionService(
   transactionId,
   amount,
   description,
+  userId,
 ) {
   if (categoryId !== undefined) {
     await validateActiveCategory(categoryId);
@@ -41,7 +47,11 @@ async function updateTransactionService(
     ...(categoryId !== undefined && { categoryId }),
     ...(description !== undefined && { description }),
   };
-  const updatedTransaction = await updateTransactionById(transactionId, data);
+  const updatedTransaction = await updateTransactionById(
+    transactionId,
+    data,
+    userId,
+  );
   return updatedTransaction;
 }
 module.exports = {

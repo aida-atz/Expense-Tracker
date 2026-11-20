@@ -49,73 +49,85 @@ describe("validateActiveCategory", () => {
 describe("changeCategoryArchiveStatus", () => {
   test("throws 404 when category does not exist", async () => {
     getCategoryById.mockResolvedValue(null);
+    const userId = "user-123";
+    const categoryId = "category-123";
     await expect(
-      changeCategoryArchiveStatus("category-123", false),
+      changeCategoryArchiveStatus(categoryId, false, userId),
     ).rejects.toMatchObject({
       statusCode: 404,
     });
-    expect(getCategoryById).toHaveBeenCalledWith("category-123");
+    expect(getCategoryById).toHaveBeenCalledWith(categoryId, userId);
     expect(setCategoryArchived).not.toHaveBeenCalled();
   });
   test("throws 403 when category is default", async () => {
+    const categoryId = "category-123";
+    const userId = "user-123";
     getCategoryById.mockResolvedValue({
-      id: "category-123",
+      id: categoryId,
       isArchived: false,
       isDefault: true,
     });
     await expect(
-      changeCategoryArchiveStatus("category-123", false),
+      changeCategoryArchiveStatus(categoryId, false, userId),
     ).rejects.toMatchObject({
       statusCode: 403,
     });
-    expect(getCategoryById).toHaveBeenCalledWith("category-123");
+    expect(getCategoryById).toHaveBeenCalledWith(categoryId, userId);
     expect(setCategoryArchived).not.toHaveBeenCalled();
   });
   test("throws 409 when category is already archived", async () => {
+    const categoryId = "category-123";
+    const userId = "user-123";
     getCategoryById.mockResolvedValue({
-      id: "category-123",
+      id: categoryId,
       isDefault: false,
       isArchived: true,
     });
     await expect(
-      changeCategoryArchiveStatus("category-123", true),
+      changeCategoryArchiveStatus(categoryId, true, userId),
     ).rejects.toMatchObject({
       statusCode: 409,
     });
-    expect(getCategoryById).toHaveBeenCalledWith("category-123");
+    expect(getCategoryById).toHaveBeenCalledWith(categoryId, userId);
     expect(setCategoryArchived).not.toHaveBeenCalled();
   });
 
   test("throws 409 when category is already archived", async () => {
+    const categoryId = "category-123";
+    const userId = "user-123";
     getCategoryById.mockResolvedValue({
-      id: "category-123",
+      id: categoryId,
       isDefault: false,
       isArchived: true,
     });
     await expect(
-      changeCategoryArchiveStatus("category-123", true),
+      changeCategoryArchiveStatus(categoryId, true, userId),
     ).rejects.toMatchObject({
       statusCode: 409,
     });
-    expect(getCategoryById).toHaveBeenCalledWith("category-123");
+    expect(getCategoryById).toHaveBeenCalledWith(categoryId, userId);
     expect(setCategoryArchived).not.toHaveBeenCalled();
   });
   test("throws 409 when category is already active", async () => {
+    const categoryId = "category-123";
+    const userId = "user-123";
+
     getCategoryById.mockResolvedValue({
-      id: "category-123",
+      id: categoryId,
       isDefault: false,
       isArchived: false,
     });
     await expect(
-      changeCategoryArchiveStatus("category-123", false),
+      changeCategoryArchiveStatus(categoryId, false, userId),
     ).rejects.toMatchObject({
       statusCode: 409,
     });
-    expect(getCategoryById).toHaveBeenCalledWith("category-123");
+    expect(getCategoryById).toHaveBeenCalledWith(categoryId, userId);
     expect(setCategoryArchived).not.toHaveBeenCalled();
   });
   test("successfully archives an active category", async () => {
     const categoryId = "category-123";
+    const userId = "user-123";
     getCategoryById.mockResolvedValue({
       id: categoryId,
       isDefault: false,
@@ -128,15 +140,16 @@ describe("changeCategoryArchiveStatus", () => {
       isArchived: true,
     });
     await expect(
-      changeCategoryArchiveStatus(categoryId, true),
+      changeCategoryArchiveStatus(categoryId, true, userId),
     ).resolves.toMatchObject({
       isArchived: true,
     });
-    expect(getCategoryById).toHaveBeenCalledWith("category-123");
-    expect(setCategoryArchived).toHaveBeenCalledWith(categoryId, true);
+    expect(getCategoryById).toHaveBeenCalledWith("category-123", userId);
+    expect(setCategoryArchived).toHaveBeenCalledWith(categoryId, true, userId);
   });
   test("successfully unarchives an deactive category", async () => {
     const categoryId = "category-123";
+    const userId = "user-123";
     getCategoryById.mockResolvedValue({
       id: categoryId,
       isDefault: false,
@@ -149,12 +162,12 @@ describe("changeCategoryArchiveStatus", () => {
       isArchived: false,
     });
     await expect(
-      changeCategoryArchiveStatus(categoryId, false),
+      changeCategoryArchiveStatus(categoryId, false, userId),
     ).resolves.toMatchObject({
       isArchived: false,
     });
-    expect(getCategoryById).toHaveBeenCalledWith("category-123");
-    expect(setCategoryArchived).toHaveBeenCalledWith(categoryId, false);
+    expect(getCategoryById).toHaveBeenCalledWith("category-123", userId);
+    expect(setCategoryArchived).toHaveBeenCalledWith(categoryId, false, userId);
   });
 });
 
@@ -186,7 +199,6 @@ describe("updateCategoryService", () => {
     expect(updateCategoryById).not.toHaveBeenCalled();
   });
   test("throws 409 when trying to update an archived category", async () => {
-
     const categoryId = "category-123";
     const data = { name: "Groceries" };
     getCategoryById.mockResolvedValue({
