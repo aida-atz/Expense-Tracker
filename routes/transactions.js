@@ -1,19 +1,19 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const {
+import {
   addTransactionValidator,
   transactionIdValidator,
   transactionQueryValidator,
   updateTransactionValidator,
-} = require("../validators/transaction.cjs");
-const validateRequest = require("../middlewares/validateRequest.cjs");
-const {
+} from "../validators/transaction.js";
+import validateRequest from "../middlewares/validateRequest.js";
+import {
   addTransaction,
   getTransactions,
   deleteTransaction,
   getTransaction,
   updateTransaction,
-} = require("../controllers/transactions.cjs");
+} from "../controllers/transactions.js";
 
 router.get("/", transactionQueryValidator, validateRequest, getTransactions);
 router.post("/", addTransactionValidator, validateRequest, addTransaction);
@@ -30,4 +30,4 @@ router.patch(
   validateRequest,
   updateTransaction,
 );
-module.exports = router;
+export default router;

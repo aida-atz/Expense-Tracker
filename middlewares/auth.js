@@ -1,6 +1,6 @@
-const jwt = require("jsonwebtoken");
-require("dotenv/config");
-const AppError = require("../utils/AppError.cjs");
+import jwt from "jsonwebtoken";
+import "dotenv/config";
+import AppError from "../utils/AppError.js";
 function protect(req, res, next) {
   const authHeader = req.headers.authorization;
 
@@ -51,4 +51,4 @@ function protect(req, res, next) {
 
   next();
 }
-module.exports = protect;
+export default protect;

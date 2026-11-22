@@ -1,25 +1,30 @@
-const AppError = require("../utils/AppError.cjs");
-const {
+import AppError from "../utils/AppError.js";
+import {
   getAllTransactions,
   removeTransaction,
   getTransactionById,
   updateTransactionById,
   createTransaction,
-} = require("../models/transactions.cjs");
-const { validateActiveCategory } = require("./categories.cjs");
-async function getTransactionsService(type, userId) {
+} from "../models/transactions.js";
+import { validateActiveCategory } from "./categories.js";
+export async function getTransactionsService(type, userId) {
   const transactions = await getAllTransactions(type, userId);
   return transactions;
 }
-async function getTransactionService(transactionId, userId) {
+export async function getTransactionService(transactionId, userId) {
   const transaction = await getTransactionById(transactionId, userId);
   if (!transaction) {
     throw new AppError("Transaction not found.", 404);
   }
   return transaction;
 }
-async function addTransactionService(amount, categoryId, description, userId) {
-  if (categoryId) await validateActiveCategory(categoryId);
+export async function addTransactionService(
+  amount,
+  categoryId,
+  description,
+  userId,
+) {
+  if (categoryId) await validateActiveCategory(categoryId, userId);
   const transaction = await createTransaction(
     amount,
     categoryId,
@@ -28,11 +33,11 @@ async function addTransactionService(amount, categoryId, description, userId) {
   );
   return transaction;
 }
-async function deleteTransactionService(transactionId, userId) {
+export async function deleteTransactionService(transactionId, userId) {
   const removedtransaction = await removeTransaction(transactionId, userId);
   return removedtransaction;
 }
-async function updateTransactionService(
+export async function updateTransactionService(
   categoryId,
   transactionId,
   amount,
@@ -40,7 +45,7 @@ async function updateTransactionService(
   userId,
 ) {
   if (categoryId !== undefined) {
-    await validateActiveCategory(categoryId);
+    await validateActiveCategory(categoryId, userId);
   }
   const data = {
     ...(amount !== undefined && { amount }),
@@ -54,10 +59,3 @@ async function updateTransactionService(
   );
   return updatedTransaction;
 }
-module.exports = {
-  getTransactionsService,
-  getTransactionService,
-  addTransactionService,
-  deleteTransactionService,
-  updateTransactionService,
-};

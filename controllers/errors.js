@@ -1,7 +1,7 @@
-function notFound(req, res, next) {
+export function notFound(req, res, next) {
   res.status(404).json({ message: "Route not found." });
 }
-function errorHandler(err, req, res, next) {
+export function errorHandler(err, req, res, next) {
   console.log(err);
   if (err.code === "P2003") {
     res.status(400).json({
@@ -30,4 +30,3 @@ function errorHandler(err, req, res, next) {
     message: statusCode === 500 ? "Internet Server Error" : err.message,
   });
 }
-module.exports = { notFound, errorHandler };

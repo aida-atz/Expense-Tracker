@@ -1,8 +1,8 @@
-const { body, param, checkExact } = require("express-validator");
-const categoryIdValidator = [
+import { body, param, checkExact } from "express-validator";
+export const categoryIdValidator = [
   param("id").isUUID().withMessage("Invalid category id."),
 ];
-const addCategoryValidator = [
+export const addCategoryValidator = [
   body("type")
     .isIn(["INCOME", "EXPENSE"])
     .withMessage("Invalid transaction type"),
@@ -12,7 +12,7 @@ const addCategoryValidator = [
     .isLength({ max: 20 })
     .withMessage("Name is too long."),
 ];
-const updateCategoryValidator = checkExact(
+export const updateCategoryValidator = checkExact(
   [
     body("name")
       .exists()
@@ -32,8 +32,3 @@ const updateCategoryValidator = checkExact(
     message: "Unknown fields are not allowed",
   },
 );
-module.exports = {
-  categoryIdValidator,
-  addCategoryValidator,
-  updateCategoryValidator,
-};

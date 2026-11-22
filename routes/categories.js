@@ -1,20 +1,19 @@
-const {
-  categoryIdValidator,
+import {
   addCategoryValidator,
+  categoryIdValidator,
   updateCategoryValidator,
-} = require("../validators/category.cjs");
-const validateRequest = require("../middlewares/validateRequest.cjs");
-const express = require("express");
-
-const router = express.Router();
-const {
-  getCategories,
+} from "../validators/category.js";
+import {
   addCategory,
   archiveCategory,
   getCategory,
   updateCategory,
   unarchiveCategory,
-} = require("../controllers/categories.cjs");
+  getCategories,
+} from "../controllers/categories.js";
+import validateRequest from "../middlewares/validateRequest.js";
+import express from "express";
+const router = express.Router();
 router.get("/", getCategories);
 router.post("/", addCategoryValidator, validateRequest, addCategory);
 router.patch("/:id", categoryIdValidator, validateRequest, archiveCategory);
@@ -26,4 +25,4 @@ router.patch(
   validateRequest,
   unarchiveCategory,
 );
-module.exports = router;
+export default router;

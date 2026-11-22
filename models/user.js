@@ -1,5 +1,5 @@
-const prisma = require("../config/prisma.cjs");
-async function createUser(email, passwordHash) {
+import prisma from "../config/prisma.js";
+export async function createUser(email, passwordHash) {
   return prisma.user.create({
     data: {
       email,
@@ -12,10 +12,6 @@ async function createUser(email, passwordHash) {
     },
   });
 }
-async function getUserByEmail(email) {
+export async function getUserByEmail(email) {
   return prisma.user.findUnique({ where: { email } });
 }
-module.exports = {
-  createUser,
-  getUserByEmail,
-};

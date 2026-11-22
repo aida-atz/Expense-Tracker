@@ -1,11 +1,11 @@
-const {
+import {
   getTransactionsService,
   getTransactionService,
   addTransactionService,
   deleteTransactionService,
   updateTransactionService,
-} = require("../services/transactions.cjs");
-async function addTransaction(req, res) {
+} from "../services/transactions.js";
+export async function addTransaction(req, res) {
   const { amount, categoryId, description } = req.body;
   const userId = req.user.id;
   const transaction = await addTransactionService(
@@ -19,7 +19,7 @@ async function addTransaction(req, res) {
     data: { transaction },
   });
 }
-async function getTransactions(req, res) {
+export async function getTransactions(req, res) {
   const { type } = req.query;
   const userId = req.user.id;
   const transactions = await getTransactionsService(type, userId);
@@ -30,19 +30,19 @@ async function getTransactions(req, res) {
     },
   });
 }
-async function deleteTransaction(req, res) {
+export async function deleteTransaction(req, res) {
   const transactionId = req.params.id;
   const userId = req.user.id;
   const transaction = await deleteTransactionService(transactionId, userId);
   res.status(200).json({ status: "success", data: { transaction } });
 }
-async function getTransaction(req, res) {
+export async function getTransaction(req, res) {
   const transactionId = req.params.id;
   const userId = req.user.id;
   const transaction = await getTransactionService(transactionId, userId);
   res.status(200).json({ status: "success", data: { transaction } });
 }
-async function updateTransaction(req, res) {
+export async function updateTransaction(req, res) {
   const transactionId = req.params.id;
   const userId = req.user.id;
   const { amount, categoryId, description } = req.body;
@@ -57,10 +57,3 @@ async function updateTransaction(req, res) {
     .status(200)
     .json({ status: "success", data: { transaction: updatedTransaction } });
 }
-module.exports = {
-  addTransaction,
-  getTransactions,
-  deleteTransaction,
-  getTransaction,
-  updateTransaction,
-};

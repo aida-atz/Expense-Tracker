@@ -1,10 +1,10 @@
-const { body, param, query } = require("express-validator");
+import { body, param, query } from "express-validator";
 const validTypes = ["INCOME", "EXPENSE"];
 
-const transactionIdValidator = [
+export const transactionIdValidator = [
   param("id").isUUID().withMessage("Invalid transaction ID"),
 ];
-const addTransactionValidator = [
+export const addTransactionValidator = [
   body("amount")
     .isFloat({ gt: 0, max: 9999999999.99 })
     .withMessage("Invalid amount"),
@@ -16,13 +16,13 @@ const addTransactionValidator = [
     .isLength({ max: 500 })
     .withMessage("Description is too long"),
 ];
-const transactionQueryValidator = [
+export const transactionQueryValidator = [
   query("type")
     .optional()
     .isIn(validTypes)
     .withMessage("Invalid transaction type"),
 ];
-const updateTransactionValidator = [
+export const updateTransactionValidator = [
   body("amount")
     .optional()
     .custom((value) => {
@@ -43,9 +43,3 @@ const updateTransactionValidator = [
     .isLength({ max: 500 })
     .withMessage("Description is too long"),
 ];
-module.exports = {
-  addTransactionValidator,
-  transactionIdValidator,
-  transactionQueryValidator,
-  updateTransactionValidator,
-};

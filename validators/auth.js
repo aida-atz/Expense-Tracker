@@ -1,5 +1,5 @@
-const { body, checkExact } = require("express-validator");
-const registerValidator = checkExact([
+import { body, checkExact } from "express-validator";
+export const registerValidator = checkExact([
   body("email")
     .exists()
     .withMessage("Emails is required")
@@ -24,7 +24,7 @@ const registerValidator = checkExact([
     .matches(/[^a-zA-Z0-9\s]/)
     .withMessage("Password must contain at least one special character"),
 ]);
-const loginValidator = checkExact([
+export const loginValidator = checkExact([
   body("email")
     .exists()
     .withMessage("Email is Required.")
@@ -40,4 +40,3 @@ const loginValidator = checkExact([
     .bail(),
 ]);
 
-module.exports = { registerValidator, loginValidator };

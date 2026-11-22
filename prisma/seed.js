@@ -1,5 +1,4 @@
-const prisma = require("../config/prisma.cjs");
-
+import prisma from "../config/prisma.js";
 const defaultCategories = [
   { name: "Salary", type: "INCOME" },
   { name: "Freelance", type: "INCOME" },

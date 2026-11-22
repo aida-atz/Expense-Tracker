@@ -1,13 +1,13 @@
-const AppError = require("../utils/AppError.cjs");
-const {
+import AppError from "../utils/AppError.js";
+import {
   setCategoryArchived,
   updateCategoryById,
   createCategory,
   getAllCategories,
   getCategoryById,
-} = require("../models/category.cjs");
-async function validateActiveCategory(categoryId) {
-  const category = await getCategoryById(categoryId);
+} from "../models/category.js";
+export async function validateActiveCategory(categoryId, userId) {
+  const category = await getCategoryById(categoryId, userId);
   if (!category) {
     throw new AppError("Category not found.", 404);
   }
@@ -15,7 +15,11 @@ async function validateActiveCategory(categoryId) {
     throw new AppError("Category is archived", 409);
   }
 }
-async function changeCategoryArchiveStatus(categoryId, isArchived, userId) {
+export async function changeCategoryArchiveStatus(
+  categoryId,
+  isArchived,
+  userId,
+) {
   const category = await getCategoryById(categoryId, userId);
   if (!category) {
     throw new AppError("Category not found", 404);
@@ -31,8 +35,8 @@ async function changeCategoryArchiveStatus(categoryId, isArchived, userId) {
   }
   return setCategoryArchived(categoryId, isArchived, userId);
 }
-async function updateCategoryService(categoryId, data) {
-  const category = await getCategoryById(categoryId);
+export async function updateCategoryService(categoryId, data, userId) {
+  const category = await getCategoryById(categoryId, userId);
   if (!category) {
     throw new AppError("Category not found", 404);
   }
@@ -43,31 +47,27 @@ async function updateCategoryService(categoryId, data) {
   if (category.isArchived) {
     throw new AppError("Archived categories cannot be updated", 409);
   }
-  const updatedCategory = await updateCategoryById(categoryId, {
-    name: data.name.trim(),
-  });
+  const updatedCategory = await updateCategoryById(
+    categoryId,
+    {
+      name: data.name.trim(),
+    },
+    userId,
+  );
   return updatedCategory;
 }
-async function addCategoryService(name, type, userId) {
+export async function addCategoryService(name, type, userId) {
   const category = await createCategory(name, type, userId);
   return category;
 }
-async function getCategoriesService(userId) {
+export async function getCategoriesService(userId) {
   const categories = await getAllCategories(userId);
   return categories;
 }
-async function getCategoryService(categoryId, userId) {
+export async function getCategoryService(categoryId, userId) {
   const category = await getCategoryById(categoryId, userId);
   if (!category) {
     throw new AppError("Category not found", 404);
   }
   return category;
 }
-module.exports = {
-  validateActiveCategory,
-  changeCategoryArchiveStatus,
-  updateCategoryService,
-  addCategoryService,
-  getCategoriesService,
-  getCategoryService,
-};

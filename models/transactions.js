@@ -1,5 +1,5 @@
-const prisma = require("../config/prisma.cjs");
-async function getAllTransactions(type, userId) {
+import prisma from "../config/prisma.js";
+export async function getAllTransactions(type, userId) {
   return prisma.transaction.findMany({
     where: {
       userId,
@@ -11,7 +11,12 @@ async function getAllTransactions(type, userId) {
     },
   });
 }
-async function createTransaction(amount, categoryId, description, userId) {
+export async function createTransaction(
+  amount,
+  categoryId,
+  description,
+  userId,
+) {
   return prisma.transaction.create({
     data: {
       amount,
@@ -25,7 +30,7 @@ async function createTransaction(amount, categoryId, description, userId) {
     },
   });
 }
-async function removeTransaction(transactionId, userId) {
+export async function removeTransaction(transactionId, userId) {
   return prisma.transaction.delete({
     where: {
       id: transactionId,
@@ -33,7 +38,7 @@ async function removeTransaction(transactionId, userId) {
     },
   });
 }
-async function getTransactionById(transactionId, userId) {
+export async function getTransactionById(transactionId, userId) {
   return prisma.transaction.findUnique({
     where: {
       id: transactionId,
@@ -41,7 +46,7 @@ async function getTransactionById(transactionId, userId) {
     },
   });
 }
-async function updateTransactionById(transactionId, data, userId) {
+export async function updateTransactionById(transactionId, data, userId) {
   return prisma.transaction.update({
     where: {
       id: transactionId,
@@ -50,10 +55,3 @@ async function updateTransactionById(transactionId, data, userId) {
     data,
   });
 }
-module.exports = {
-  getAllTransactions,
-  createTransaction,
-  removeTransaction,
-  getTransactionById,
-  updateTransactionById,
-};

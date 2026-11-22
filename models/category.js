@@ -1,5 +1,5 @@
-const prisma = require("../config/prisma.cjs");
-async function getAllCategories(userId) {
+import prisma from "../config/prisma.js";
+export async function getAllCategories(userId) {
   return prisma.category.findMany({
     where: {
       OR: [
@@ -15,7 +15,7 @@ async function getAllCategories(userId) {
     },
   });
 }
-async function createCategory(name, type, userId) {
+export async function createCategory(name, type, userId) {
   return prisma.category.create({
     data: {
       name,
@@ -27,7 +27,7 @@ async function createCategory(name, type, userId) {
     },
   });
 }
-async function setCategoryArchived(categoryId, isArchived, userId) {
+export async function setCategoryArchived(categoryId, isArchived, userId) {
   if (!userId) {
     throw new Error("userId is required");
   }
@@ -43,7 +43,11 @@ async function setCategoryArchived(categoryId, isArchived, userId) {
     },
   });
 }
-async function getCategoryById(categoryId, userId, withTransactions = false) {
+export async function getCategoryById(
+  categoryId,
+  userId,
+  withTransactions = false,
+) {
   if (!userId) {
     throw new Error("userId is required");
   }
@@ -73,7 +77,7 @@ async function getCategoryById(categoryId, userId, withTransactions = false) {
     }),
   });
 }
-async function updateCategoryById(categoryId, data) {
+export async function updateCategoryById(categoryId, data) {
   return prisma.category.update({
     where: {
       id: categoryId,
@@ -81,11 +85,3 @@ async function updateCategoryById(categoryId, data) {
     data,
   });
 }
-
-module.exports = {
-  getAllCategories,
-  createCategory,
-  setCategoryArchived,
-  getCategoryById,
-  updateCategoryById,
-};
