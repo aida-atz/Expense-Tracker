@@ -1,16 +1,18 @@
-
 import { jest } from "@jest/globals";
 
 const categoryId = "category-123";
 const userId = "user-123";
 
-jest.unstable_mockModule("../models/category.js", () => ({
-  getCategoryById: jest.fn(),
-  getAllCategories: jest.fn(),
-  createCategory: jest.fn(),
-  updateCategoryById: jest.fn(),
-  setCategoryArchived: jest.fn(),
-}));
+jest.unstable_mockModule(
+  "../modules/categories/categories.repository.js",
+  () => ({
+    getCategoryById: jest.fn(),
+    getAllCategories: jest.fn(),
+    createCategory: jest.fn(),
+    updateCategoryById: jest.fn(),
+    setCategoryArchived: jest.fn(),
+  }),
+);
 
 const {
   getCategoryById,
@@ -18,7 +20,7 @@ const {
   createCategory,
   updateCategoryById,
   setCategoryArchived,
-} = await import("../models/category.js");
+} = await import("../modules/categories/categories.repository.js");
 
 const {
   validateActiveCategory,
@@ -27,12 +29,11 @@ const {
   addCategoryService,
   getCategoriesService,
   getCategoryService,
-} = await import("../services/categories.js");
+} = await import("../modules/categories/categories.service.js");
 
 beforeEach(() => {
   jest.resetAllMocks();
 });
-
 
 describe("validateActiveCategory", () => {
   test("throws 409 when category is archived", async () => {

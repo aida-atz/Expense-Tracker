@@ -1,12 +1,12 @@
-import AppError from "../utils/AppError.js";
+import AppError from "../../utils/AppError.js";
 import {
   getAllTransactions,
   removeTransaction,
   getTransactionById,
   updateTransactionById,
   createTransaction,
-} from "../models/transactions.js";
-import { validateActiveCategory } from "./categories.js";
+} from "./transactions.repository.js";
+import { validateActiveCategory } from "../categories/index.js";
 export async function getTransactionsService(type, userId) {
   const transactions = await getAllTransactions(type, userId);
   return transactions;

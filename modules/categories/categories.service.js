@@ -1,11 +1,11 @@
-import AppError from "../utils/AppError.js";
+import AppError from "../../utils/AppError.js";
 import {
   setCategoryArchived,
   updateCategoryById,
   createCategory,
   getAllCategories,
   getCategoryById,
-} from "../models/category.js";
+} from "./categories.repository.js";
 export async function validateActiveCategory(categoryId, userId) {
   const category = await getCategoryById(categoryId, userId);
   if (!category) {

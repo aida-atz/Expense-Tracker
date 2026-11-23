@@ -4,7 +4,7 @@ import {
   addTransactionService,
   deleteTransactionService,
   updateTransactionService,
-} from "../services/transactions.js";
+} from "./transactions.service.js";
 export async function addTransaction(req, res) {
   const { amount, categoryId, description } = req.body;
   const userId = req.user.id;

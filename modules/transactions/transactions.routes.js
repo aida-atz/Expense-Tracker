@@ -5,15 +5,15 @@ import {
   transactionIdValidator,
   transactionQueryValidator,
   updateTransactionValidator,
-} from "../validators/transaction.js";
-import validateRequest from "../middlewares/validateRequest.js";
+} from "./transactions.validator.js";
+import validateRequest from "../../middlewares/validateRequest.js";
 import {
   addTransaction,
   getTransactions,
   deleteTransaction,
   getTransaction,
   updateTransaction,
-} from "../controllers/transactions.js";
+} from "./transactions.controller.js";
 
 router.get("/", transactionQueryValidator, validateRequest, getTransactions);
 router.post("/", addTransactionValidator, validateRequest, addTransaction);

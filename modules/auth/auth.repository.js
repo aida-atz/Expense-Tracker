@@ -1,4 +1,4 @@
-import prisma from "../config/prisma.js";
+import prisma from "../../config/prisma.js";
 export async function createUser(email, passwordHash) {
   return prisma.user.create({
     data: {

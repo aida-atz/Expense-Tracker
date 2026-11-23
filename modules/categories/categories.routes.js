@@ -2,7 +2,7 @@ import {
   addCategoryValidator,
   categoryIdValidator,
   updateCategoryValidator,
-} from "../validators/category.js";
+} from "./categories.validator.js";
 import {
   addCategory,
   archiveCategory,
@@ -10,8 +10,8 @@ import {
   updateCategory,
   unarchiveCategory,
   getCategories,
-} from "../controllers/categories.js";
-import validateRequest from "../middlewares/validateRequest.js";
+} from "./categories.controller.js";
+import validateRequest from "../../middlewares/validateRequest.js";
 import express from "express";
 const router = express.Router();
 router.get("/", getCategories);

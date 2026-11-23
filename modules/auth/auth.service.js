@@ -1,7 +1,7 @@
-import AppError from "../utils/AppError.js";
-import { createUser, getUserByEmail } from "../models/user.js";
+import AppError from "../../utils/AppError.js";
+import { createUser, getUserByEmail } from "./auth.repository.js";
 import argon2 from "argon2";
-import { createAccessToken } from "../utils/jwt.js";
+import { createAccessToken } from "../../utils/jwt.js";
 export async function registerService(email, password) {
   const normalizedEmail = email.trim().toLowerCase();
   const passwordHash = await argon2.hash(password, {

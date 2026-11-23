@@ -1,4 +1,4 @@
-import { registerService, loginService } from "../services/auth.js";
+import { registerService, loginService } from "./auth.service.js";
 export async function register(req, res) {
   const { email, password } = req.body;
   const user = await registerService(email, password);

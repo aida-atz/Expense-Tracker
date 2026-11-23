@@ -4,7 +4,7 @@ import {
   addCategoryService,
   getCategoriesService,
   getCategoryService,
-} from "../services/categories.js";
+} from "./categories.service.js";
 export async function getCategories(req, res) {
   const userId = req.user.id;
   const categories = await getCategoriesService(userId);
