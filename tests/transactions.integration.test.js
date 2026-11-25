@@ -10,6 +10,8 @@ jest.unstable_mockModule(
     createTransaction: jest.fn(),
     updateTransactionById: jest.fn(),
     removeTransaction: jest.fn(),
+    getTotalIncome: jest.fn(),
+    getTotalExpense: jest.fn(),
   }),
 );
 const {
@@ -18,6 +20,8 @@ const {
   createTransaction,
   updateTransactionById,
   removeTransaction,
+  getTotalIncome,
+  getTotalExpense,
 } = await import("../modules/transactions/transactions.repository.js");
 const { createAccessToken } = await import("../utils/jwt.js");
 jest.unstable_mockModule(
@@ -58,9 +62,27 @@ describe("Transactions API Integration Tests", () => {
 
     expect(response.status).toBe(200);
 
-    expect(getAllTransactions).toHaveBeenCalledWith(undefined, userId, 10, 10);
+    expect(getAllTransactions).toHaveBeenCalledWith({
+      userId,
+      type: undefined,
+      categoryId: undefined,
+      startDate: undefined,
+      endDate: undefined,
+      search: undefined,
+      skip: 10,
+      limit: 10,
+      sortBy: "createdAt",
+      sortOrder: "desc",
+    });
 
-    expect(countTransactions).toHaveBeenCalledWith(undefined, userId);
+    expect(countTransactions).toHaveBeenCalledWith({
+      userId,
+      type: undefined,
+      categoryId: undefined,
+      startDate: undefined,
+      endDate: undefined,
+      search: undefined,
+    });
 
     expect(response.body.data).toEqual({
       transactions,
@@ -133,6 +155,46 @@ describe("Transactions API Integration Tests", () => {
     expect(getCategoryById).not.toHaveBeenCalled();
 
     expect(createTransaction).not.toHaveBeenCalled();
+  });
+
+  test("GET /transactions/summary returns financial summary", async () => {
+    const token = createAccessToken(userId);
+
+    getTotalIncome.mockResolvedValue({
+      _sum: { amount: "2500.00" },
+    });
+
+    getTotalExpense.mockResolvedValue({
+      _sum: { amount: "750.25" },
+    });
+
+    const response = await request(app)
+      .get("/transactions/summary")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(response.status).toBe(200);
+
+    expect(getTotalIncome).toHaveBeenCalledWith(userId);
+    expect(getTotalExpense).toHaveBeenCalledWith(userId);
+
+    expect(response.body).toEqual({
+      status: "success",
+      data: {
+        summary: {
+          totalIncome: "2500.00",
+          totalExpense: "750.25",
+          balance: "1749.75",
+        },
+      },
+    });
+  });
+  test("GET /transactions/summary requires authentication", async () => {
+    const response = await request(app).get("/transactions/summary");
+
+    expect(response.status).toBe(401);
+
+    expect(getTotalIncome).not.toHaveBeenCalled();
+    expect(getTotalExpense).not.toHaveBeenCalled();
   });
 });
 

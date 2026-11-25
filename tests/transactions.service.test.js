@@ -9,6 +9,8 @@ jest.unstable_mockModule(
     updateTransactionById: jest.fn(),
     removeTransaction: jest.fn(),
     countTransactions: jest.fn(),
+    getTotalIncome: jest.fn(),
+    getTotalExpense: jest.fn(),
   }),
 );
 jest.unstable_mockModule("../modules/categories/index.js", () => ({
@@ -21,6 +23,8 @@ const {
   createTransaction,
   updateTransactionById,
   removeTransaction,
+  getTotalIncome,
+  getTotalExpense,
 } = await import("../modules/transactions/transactions.repository.js");
 const { validateActiveCategory } =
   await import("../modules/categories/index.js");
@@ -30,6 +34,7 @@ const {
   addTransactionService,
   deleteTransactionService,
   updateTransactionService,
+  getSummaryService,
 } = await import("../modules/transactions/transactions.service.js");
 beforeEach(() => {
   jest.resetAllMocks();
@@ -54,9 +59,27 @@ describe("getTransactionsService", () => {
 
     const result = await getTransactionsService(filters, userId);
 
-    expect(getAllTransactions).toHaveBeenCalledWith(undefined, userId, 0, 10);
+    expect(getAllTransactions).toHaveBeenCalledWith({
+      userId,
+      type: undefined,
+      categoryId: undefined,
+      startDate: undefined,
+      endDate: undefined,
+      search: undefined,
+      skip: 0,
+      limit: 10,
+      sortBy: undefined,
+      sortOrder: undefined,
+    });
 
-    expect(countTransactions).toHaveBeenCalledWith(undefined, userId);
+    expect(countTransactions).toHaveBeenCalledWith({
+      userId,
+      type: undefined,
+      categoryId: undefined,
+      startDate: undefined,
+      endDate: undefined,
+      search: undefined,
+    });
 
     expect(result).toEqual({
       transactions,
@@ -83,9 +106,27 @@ describe("getTransactionsService", () => {
 
     const result = await getTransactionsService(filters, userId);
 
-    expect(getAllTransactions).toHaveBeenCalledWith("EXPENSE", userId, 10, 10);
+    expect(getAllTransactions).toHaveBeenCalledWith({
+      userId,
+      type: "EXPENSE",
+      categoryId: undefined,
+      startDate: undefined,
+      endDate: undefined,
+      search: undefined,
+      skip: 10,
+      limit: 10,
+      sortBy: undefined,
+      sortOrder: undefined,
+    });
 
-    expect(countTransactions).toHaveBeenCalledWith("EXPENSE", userId);
+    expect(countTransactions).toHaveBeenCalledWith({
+      userId,
+      type: "EXPENSE",
+      categoryId: undefined,
+      startDate: undefined,
+      endDate: undefined,
+      search: undefined,
+    });
 
     expect(result).toEqual({
       transactions: [],
@@ -281,5 +322,66 @@ describe("deleteTransactionService", () => {
     const result = await deleteTransactionService(transactionId, userId);
     expect(removeTransaction).toHaveBeenCalledWith(transactionId, userId);
     expect(result).toEqual(deletedTransaction);
+  });
+});
+
+describe("getSummaryService", () => {
+  const userId = "user-123";
+
+  test("calculates total income, expense, and balance", async () => {
+    getTotalIncome.mockResolvedValue({
+      _sum: { amount: "5000.00" },
+    });
+
+    getTotalExpense.mockResolvedValue({
+      _sum: { amount: "1800.50" },
+    });
+
+    const result = await getSummaryService(userId);
+
+    expect(getTotalIncome).toHaveBeenCalledWith(userId);
+    expect(getTotalExpense).toHaveBeenCalledWith(userId);
+
+    expect(result).toEqual({
+      totalIncome: "5000.00",
+      totalExpense: "1800.50",
+      balance: "3199.50",
+    });
+  });
+
+  test("returns zero when no transactions exist", async () => {
+    getTotalIncome.mockResolvedValue({
+      _sum: { amount: null },
+    });
+
+    getTotalExpense.mockResolvedValue({
+      _sum: { amount: null },
+    });
+
+    const result = await getSummaryService(userId);
+
+    expect(result).toEqual({
+      totalIncome: "0.00",
+      totalExpense: "0.00",
+      balance: "0.00",
+    });
+  });
+
+  test("calculates a negative balance correctly", async () => {
+    getTotalIncome.mockResolvedValue({
+      _sum: { amount: "0.00" },
+    });
+
+    getTotalExpense.mockResolvedValue({
+      _sum: { amount: "91.05" },
+    });
+
+    const result = await getSummaryService(userId);
+
+    expect(result).toEqual({
+      totalIncome: "0.00",
+      totalExpense: "91.05",
+      balance: "-91.05",
+    });
   });
 });

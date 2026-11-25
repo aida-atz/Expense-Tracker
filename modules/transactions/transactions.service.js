@@ -6,8 +6,11 @@ import {
   updateTransactionById,
   createTransaction,
   countTransactions,
+  getTotalIncome,
+  getTotalExpense,
 } from "./transactions.repository.js";
 import { validateActiveCategory } from "../categories/index.js";
+import Decimal from "decimal.js";
 export async function getTransactionsService(filters, userId) {
   const {
     type,
@@ -99,4 +102,18 @@ export async function updateTransactionService(
     userId,
   );
   return updatedTransaction;
+}
+export async function getSummaryService(userId) {
+  const [incomeResult, expenseResult] = await Promise.all([
+    getTotalIncome(userId),
+    getTotalExpense(userId),
+  ]);
+  const totalIncome = new Decimal(incomeResult._sum.amount ?? 0);
+  const totalExpense = new Decimal(expenseResult._sum.amount ?? 0);
+  const balance = totalIncome.minus(totalExpense);
+  return {
+    totalIncome: totalIncome.toFixed(2),
+    totalExpense: totalExpense.toFixed(2),
+    balance: balance.toFixed(2),
+  };
 }

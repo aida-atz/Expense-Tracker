@@ -13,8 +13,9 @@ import {
   deleteTransaction,
   getTransaction,
   updateTransaction,
+  getSummary,
 } from "./transactions.controller.js";
-
+router.get("/summary", getSummary);
 router.get("/", transactionQueryValidator, validateRequest, getTransactions);
 router.post("/", addTransactionValidator, validateRequest, addTransaction);
 router.delete(
@@ -30,4 +31,5 @@ router.patch(
   validateRequest,
   updateTransaction,
 );
+
 export default router;
