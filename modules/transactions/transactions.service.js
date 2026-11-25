@@ -5,11 +5,52 @@ import {
   getTransactionById,
   updateTransactionById,
   createTransaction,
+  countTransactions,
 } from "./transactions.repository.js";
 import { validateActiveCategory } from "../categories/index.js";
-export async function getTransactionsService(type, userId) {
-  const transactions = await getAllTransactions(type, userId);
-  return transactions;
+export async function getTransactionsService(filters, userId) {
+  const {
+    type,
+    categoryId,
+    startDate,
+    endDate,
+    sortBy,
+    sortOrder,
+    page = 1,
+    limit = 10,
+    search,
+  } = filters;
+  const skip = (page - 1) * limit;
+  const repositoryFilters = {
+    userId,
+    type,
+    categoryId,
+    startDate,
+    endDate,
+    search,
+  };
+  const [transactions, total] = await Promise.all([
+    getAllTransactions({
+      ...repositoryFilters,
+      skip,
+      limit,
+      sortBy,
+      sortOrder,
+    }),
+    countTransactions(repositoryFilters),
+  ]);
+  const totalPages = Math.ceil(total / limit);
+  return {
+    transactions,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPreviousPage: page > 1,
+    },
+  };
 }
 export async function getTransactionService(transactionId, userId) {
   const transaction = await getTransactionById(transactionId, userId);

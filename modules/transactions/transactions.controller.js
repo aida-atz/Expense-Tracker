@@ -20,14 +20,35 @@ export async function addTransaction(req, res) {
   });
 }
 export async function getTransactions(req, res) {
-  const { type } = req.query;
+  const {
+    type,
+    categoryId,
+    startDate,
+    endDate,
+    sortBy = "createdAt",
+    sortOrder = "desc",
+    page = "1",
+    limit = "10",
+    search,
+  } = req.query;
   const userId = req.user.id;
-  const transactions = await getTransactionsService(type, userId);
+  const result = await getTransactionsService(
+    {
+      type,
+      categoryId,
+      startDate,
+      endDate,
+      sortBy,
+      sortOrder,
+      page: Number(page),
+      limit: Number(limit),
+      search,
+    },
+    userId,
+  );
   res.status(200).json({
     status: "success",
-    data: {
-      transactions,
-    },
+    data: result,
   });
 }
 export async function deleteTransaction(req, res) {

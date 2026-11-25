@@ -4,6 +4,7 @@ import request from "supertest";
 jest.unstable_mockModule(
   "../modules/transactions/transactions.repository.js",
   () => ({
+    countTransactions: jest.fn(),
     getAllTransactions: jest.fn(),
     getTransactionById: jest.fn(),
     createTransaction: jest.fn(),
@@ -12,6 +13,7 @@ jest.unstable_mockModule(
   }),
 );
 const {
+  countTransactions,
   getAllTransactions,
   createTransaction,
   updateTransactionById,
@@ -36,7 +38,7 @@ beforeEach(() => {
   jest.resetAllMocks();
 });
 describe("Transactions API Integration Tests", () => {
-  test("GET /transactions returns user transactions", async () => {
+  test("GET /transactions returns paginated user transactions", async () => {
     const transactions = [
       {
         id: "33333333-3333-4333-8333-333333333333",
@@ -44,14 +46,33 @@ describe("Transactions API Integration Tests", () => {
         userId,
       },
     ];
+
     getAllTransactions.mockResolvedValue(transactions);
+    countTransactions.mockResolvedValue(15);
+
     const token = createAccessToken(userId);
+
     const response = await request(app)
-      .get("/transactions")
+      .get("/transactions?page=2&limit=10")
       .set("Authorization", `Bearer ${token}`);
+
     expect(response.status).toBe(200);
-    expect(getAllTransactions).toHaveBeenCalledWith(undefined, userId);
-    expect(response.body.data.transactions).toEqual(transactions);
+
+    expect(getAllTransactions).toHaveBeenCalledWith(undefined, userId, 10, 10);
+
+    expect(countTransactions).toHaveBeenCalledWith(undefined, userId);
+
+    expect(response.body.data).toEqual({
+      transactions,
+      pagination: {
+        page: 2,
+        limit: 10,
+        total: 15,
+        totalPages: 2,
+        hasNextPage: false,
+        hasPreviousPage: true,
+      },
+    });
   });
   test("POST /transactions creates a transaction", async () => {
     const categoryId = "22222222-2222-4222-8222-222222222222";

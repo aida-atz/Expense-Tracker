@@ -1,14 +1,63 @@
 import prisma from "../../config/prisma.js";
-export async function getAllTransactions(type, userId) {
+function buildTransactionWhere(
+  userId,
+  type,
+  categoryId,
+  startDate,
+  endDate,
+  search,
+) {
+  return {
+    userId,
+    ...(type && {
+      category: {
+        is: { type },
+      },
+    }),
+    ...(categoryId && { categoryId }),
+    ...((startDate || endDate) && {
+      createdAt: {
+        ...(startDate && {
+          gte: new Date(`${startDate}T00:00:00.000Z`),
+        }),
+
+        ...(endDate && {
+          lt: new Date(
+            new Date(`${endDate}T00:00:00.000Z`).getTime() +
+              24 * 60 * 60 * 1000,
+          ),
+        }),
+      },
+    }),
+    ...(search && { description: { contains: search, mode: "insensitive" } }),
+  };
+}
+export async function getAllTransactions(filters) {
+  const {
+    type,
+    categoryId,
+    startDate,
+    endDate,
+    userId,
+    skip,
+    limit,
+    sortBy = "createdAt",
+    sortOrder = "desc",
+    search,
+  } = filters;
+  const where = buildTransactionWhere(
+    userId,
+    type,
+    categoryId,
+    startDate,
+    endDate,
+    search,
+  );
   return prisma.transaction.findMany({
-    where: {
-      userId,
-      ...(type && {
-        category: {
-          is: { type },
-        },
-      }),
-    },
+    where,
+    skip,
+    take: limit,
+    orderBy: [{ [sortBy]: sortOrder }, { id: "desc" }],
   });
 }
 export async function createTransaction(
@@ -53,5 +102,19 @@ export async function updateTransactionById(transactionId, data, userId) {
       userId,
     },
     data,
+  });
+}
+export async function countTransactions(filters) {
+  const { type, categoryId, startDate, endDate, userId, search } = filters;
+  const where = buildTransactionWhere(
+    userId,
+    type,
+    categoryId,
+    startDate,
+    endDate,
+    search,
+  );
+  return prisma.transaction.count({
+    where,
   });
 }

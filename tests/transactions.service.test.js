@@ -8,12 +8,14 @@ jest.unstable_mockModule(
     createTransaction: jest.fn(),
     updateTransactionById: jest.fn(),
     removeTransaction: jest.fn(),
+    countTransactions: jest.fn(),
   }),
 );
 jest.unstable_mockModule("../modules/categories/index.js", () => ({
   validateActiveCategory: jest.fn(),
 }));
 const {
+  countTransactions,
   getAllTransactions,
   getTransactionById,
   createTransaction,
@@ -32,24 +34,70 @@ const {
 beforeEach(() => {
   jest.resetAllMocks();
 });
+
 describe("getTransactionsService", () => {
-  test("returns transactions belonging to the user", async () => {
-    const userId = "user-123";
+  const userId = "user-123";
+
+  test("returns paginated transactions belonging to the user", async () => {
+    const filters = {
+      page: 1,
+      limit: 10,
+    };
+
     const transactions = [
       { id: "transaction-1", amount: 100, userId },
       { id: "transaction-2", amount: 200, userId },
     ];
+
     getAllTransactions.mockResolvedValue(transactions);
-    const result = await getTransactionsService(undefined, userId);
-    expect(getAllTransactions).toHaveBeenCalledWith(undefined, userId);
-    expect(result).toEqual(transactions);
+    countTransactions.mockResolvedValue(12);
+
+    const result = await getTransactionsService(filters, userId);
+
+    expect(getAllTransactions).toHaveBeenCalledWith(undefined, userId, 0, 10);
+
+    expect(countTransactions).toHaveBeenCalledWith(undefined, userId);
+
+    expect(result).toEqual({
+      transactions,
+      pagination: {
+        page: 1,
+        limit: 10,
+        total: 12,
+        totalPages: 2,
+        hasNextPage: true,
+        hasPreviousPage: false,
+      },
+    });
   });
 
-  test("passes the transaction type to repository", async () => {
-    const userId = "user-123";
+  test("passes type filter and calculates pagination correctly", async () => {
+    const filters = {
+      type: "EXPENSE",
+      page: 2,
+      limit: 10,
+    };
+
     getAllTransactions.mockResolvedValue([]);
-    await getTransactionsService("EXPENSE", userId);
-    expect(getAllTransactions).toHaveBeenCalledWith("EXPENSE", userId);
+    countTransactions.mockResolvedValue(25);
+
+    const result = await getTransactionsService(filters, userId);
+
+    expect(getAllTransactions).toHaveBeenCalledWith("EXPENSE", userId, 10, 10);
+
+    expect(countTransactions).toHaveBeenCalledWith("EXPENSE", userId);
+
+    expect(result).toEqual({
+      transactions: [],
+      pagination: {
+        page: 2,
+        limit: 10,
+        total: 25,
+        totalPages: 3,
+        hasNextPage: true,
+        hasPreviousPage: true,
+      },
+    });
   });
 });
 
