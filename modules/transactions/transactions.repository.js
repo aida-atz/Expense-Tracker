@@ -118,26 +118,21 @@ export async function countTransactions(filters) {
     where,
   });
 }
-export async function getTotalIncome(userId) {
+export async function getTotalByType(userId, type, dateRange = {}) {
+  const { startDate, endDate } = dateRange;
   return prisma.transaction.aggregate({
     where: {
       userId,
       category: {
-        is: { type: "INCOME" },
+        is: { type },
       },
-    },
-    _sum: {
-      amount: true,
-    },
-  });
-}
-export async function getTotalExpense(userId) {
-  return prisma.transaction.aggregate({
-    where: {
-      userId,
-      category: {
-        is: { type: "EXPENSE" },
-      },
+      ...(startDate &&
+        endDate && {
+          createdAt: {
+            gte: startDate,
+            lt: endDate,
+          },
+        }),
     },
     _sum: {
       amount: true,

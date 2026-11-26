@@ -10,8 +10,7 @@ jest.unstable_mockModule(
     createTransaction: jest.fn(),
     updateTransactionById: jest.fn(),
     removeTransaction: jest.fn(),
-    getTotalIncome: jest.fn(),
-    getTotalExpense: jest.fn(),
+    getTotalByType: jest.fn(),
   }),
 );
 const {
@@ -20,8 +19,7 @@ const {
   createTransaction,
   updateTransactionById,
   removeTransaction,
-  getTotalIncome,
-  getTotalExpense,
+  getTotalByType,
 } = await import("../modules/transactions/transactions.repository.js");
 const { createAccessToken } = await import("../utils/jwt.js");
 jest.unstable_mockModule(
@@ -160,13 +158,13 @@ describe("Transactions API Integration Tests", () => {
   test("GET /transactions/summary returns financial summary", async () => {
     const token = createAccessToken(userId);
 
-    getTotalIncome.mockResolvedValue({
-      _sum: { amount: "2500.00" },
-    });
-
-    getTotalExpense.mockResolvedValue({
-      _sum: { amount: "750.25" },
-    });
+    getTotalByType
+      .mockResolvedValueOnce({
+        _sum: { amount: "2500.00" },
+      })
+      .mockResolvedValueOnce({
+        _sum: { amount: "750.25" },
+      });
 
     const response = await request(app)
       .get("/transactions/summary")
@@ -174,17 +172,16 @@ describe("Transactions API Integration Tests", () => {
 
     expect(response.status).toBe(200);
 
-    expect(getTotalIncome).toHaveBeenCalledWith(userId);
-    expect(getTotalExpense).toHaveBeenCalledWith(userId);
+    expect(getTotalByType).toHaveBeenNthCalledWith(1, userId, "INCOME");
+
+    expect(getTotalByType).toHaveBeenNthCalledWith(2, userId, "EXPENSE");
 
     expect(response.body).toEqual({
       status: "success",
       data: {
-        summary: {
-          totalIncome: "2500.00",
-          totalExpense: "750.25",
-          balance: "1749.75",
-        },
+        totalIncome: "2500.00",
+        totalExpense: "750.25",
+        balance: "1749.75",
       },
     });
   });
@@ -193,8 +190,79 @@ describe("Transactions API Integration Tests", () => {
 
     expect(response.status).toBe(401);
 
-    expect(getTotalIncome).not.toHaveBeenCalled();
-    expect(getTotalExpense).not.toHaveBeenCalled();
+    expect(getTotalByType).not.toHaveBeenCalled();
+  });
+
+  test("GET /transactions/reports/monthly returns 12 monthly reports", async () => {
+    const token = createAccessToken(userId);
+
+    getTotalByType.mockImplementation(async (userId, type, dateRange) => {
+      const month = dateRange.startDate.getUTCMonth() + 1;
+
+      if (month === 11) {
+        return {
+          _sum: {
+            amount: type === "INCOME" ? "3000.00" : "1200.50",
+          },
+        };
+      }
+
+      return {
+        _sum: { amount: null },
+      };
+    });
+
+    const response = await request(app)
+      .get("/transactions/reports/monthly?year=2026")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body.status).toBe("success");
+
+    const { year, months } = response.body.data;
+
+    expect(year).toBe(2026);
+    expect(months).toHaveLength(12);
+
+    expect(months.map((item) => item.month)).toEqual(
+      Array.from({ length: 12 }, (_, index) => index + 1),
+    );
+
+    expect(months[10]).toEqual({
+      month: 11,
+      income: "3000.00",
+      expense: "1200.50",
+      balance: "1799.50",
+    });
+
+    expect(months[0]).toEqual({
+      month: 1,
+      income: "0.00",
+      expense: "0.00",
+      balance: "0.00",
+    });
+
+    expect(getTotalByType).toHaveBeenCalledTimes(24);
+  });
+  test("GET /transactions/reports/monthly rejects invalid year", async () => {
+    const token = createAccessToken(userId);
+
+    const response = await request(app)
+      .get("/transactions/reports/monthly?year=1999")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(response.status).toBe(400);
+
+    expect(getTotalByType).not.toHaveBeenCalled();
+  });
+  test("GET /transactions/reports/monthly requires authentication", async () => {
+    const response = await request(app).get(
+      "/transactions/reports/monthly?year=2026",
+    );
+
+    expect(response.status).toBe(401);
+
+    expect(getTotalByType).not.toHaveBeenCalled();
   });
 });
 

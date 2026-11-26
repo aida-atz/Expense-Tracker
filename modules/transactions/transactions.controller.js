@@ -5,6 +5,7 @@ import {
   deleteTransactionService,
   updateTransactionService,
   getSummaryService,
+  getYearlyReportService,
 } from "./transactions.service.js";
 export async function addTransaction(req, res) {
   const { amount, categoryId, description } = req.body;
@@ -82,5 +83,11 @@ export async function updateTransaction(req, res) {
 export async function getSummary(req, res) {
   const userId = req.user.id;
   const summary = await getSummaryService(userId);
-  res.status(200).json({ status: "success", data: { summary } });
+  res.status(200).json({ status: "success", data: { ...summary } });
+}
+export async function getYearlyReport(req, res) {
+  const userId = req.user.id;
+  const year = Number(req.query.year);
+  const report = await getYearlyReportService(userId, year);
+  res.status(200).json({ status: "success", data: { ...report } });
 }

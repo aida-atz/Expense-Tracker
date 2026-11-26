@@ -9,8 +9,7 @@ jest.unstable_mockModule(
     updateTransactionById: jest.fn(),
     removeTransaction: jest.fn(),
     countTransactions: jest.fn(),
-    getTotalIncome: jest.fn(),
-    getTotalExpense: jest.fn(),
+    getTotalByType: jest.fn(),
   }),
 );
 jest.unstable_mockModule("../modules/categories/index.js", () => ({
@@ -23,8 +22,7 @@ const {
   createTransaction,
   updateTransactionById,
   removeTransaction,
-  getTotalIncome,
-  getTotalExpense,
+  getTotalByType,
 } = await import("../modules/transactions/transactions.repository.js");
 const { validateActiveCategory } =
   await import("../modules/categories/index.js");
@@ -35,6 +33,8 @@ const {
   deleteTransactionService,
   updateTransactionService,
   getSummaryService,
+  getMonthlyReportService,
+  getYearlyReportService,
 } = await import("../modules/transactions/transactions.service.js");
 beforeEach(() => {
   jest.resetAllMocks();
@@ -329,18 +329,19 @@ describe("getSummaryService", () => {
   const userId = "user-123";
 
   test("calculates total income, expense, and balance", async () => {
-    getTotalIncome.mockResolvedValue({
-      _sum: { amount: "5000.00" },
-    });
-
-    getTotalExpense.mockResolvedValue({
-      _sum: { amount: "1800.50" },
-    });
+    getTotalByType
+      .mockResolvedValueOnce({
+        _sum: { amount: "5000.00" },
+      })
+      .mockResolvedValueOnce({
+        _sum: { amount: "1800.50" },
+      });
 
     const result = await getSummaryService(userId);
 
-    expect(getTotalIncome).toHaveBeenCalledWith(userId);
-    expect(getTotalExpense).toHaveBeenCalledWith(userId);
+    expect(getTotalByType).toHaveBeenNthCalledWith(1, userId, "INCOME");
+
+    expect(getTotalByType).toHaveBeenNthCalledWith(2, userId, "EXPENSE");
 
     expect(result).toEqual({
       totalIncome: "5000.00",
@@ -350,11 +351,7 @@ describe("getSummaryService", () => {
   });
 
   test("returns zero when no transactions exist", async () => {
-    getTotalIncome.mockResolvedValue({
-      _sum: { amount: null },
-    });
-
-    getTotalExpense.mockResolvedValue({
+    getTotalByType.mockResolvedValue({
       _sum: { amount: null },
     });
 
@@ -368,13 +365,13 @@ describe("getSummaryService", () => {
   });
 
   test("calculates a negative balance correctly", async () => {
-    getTotalIncome.mockResolvedValue({
-      _sum: { amount: "0.00" },
-    });
-
-    getTotalExpense.mockResolvedValue({
-      _sum: { amount: "91.05" },
-    });
+    getTotalByType
+      .mockResolvedValueOnce({
+        _sum: { amount: "0.00" },
+      })
+      .mockResolvedValueOnce({
+        _sum: { amount: "91.05" },
+      });
 
     const result = await getSummaryService(userId);
 
@@ -383,5 +380,53 @@ describe("getSummaryService", () => {
       totalExpense: "91.05",
       balance: "-91.05",
     });
+  });
+});
+
+describe("getYearlyReportService", () => {
+  const userId = "user-123";
+
+  test("returns financial reports for all 12 months", async () => {
+    getTotalByType.mockImplementation(async (userId, type, dateRange) => {
+      const month = dateRange.startDate.getUTCMonth() + 1;
+
+      if (month === 11) {
+        return {
+          _sum: {
+            amount: type === "INCOME" ? "3000.00" : "1200.50",
+          },
+        };
+      }
+
+      return {
+        _sum: { amount: null },
+      };
+    });
+
+    const result = await getYearlyReportService(userId, 2026);
+
+    expect(result.year).toBe(2026);
+
+    expect(result.months).toHaveLength(12);
+
+    expect(result.months.map((item) => item.month)).toEqual([
+      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
+    ]);
+
+    expect(result.months[10]).toEqual({
+      month: 11,
+      income: "3000.00",
+      expense: "1200.50",
+      balance: "1799.50",
+    });
+
+    expect(result.months[0]).toEqual({
+      month: 1,
+      income: "0.00",
+      expense: "0.00",
+      balance: "0.00",
+    });
+
+    expect(getTotalByType).toHaveBeenCalledTimes(24);
   });
 });

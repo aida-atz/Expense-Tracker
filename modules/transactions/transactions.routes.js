@@ -5,6 +5,7 @@ import {
   transactionIdValidator,
   transactionQueryValidator,
   updateTransactionValidator,
+  monthlyReportValidator,
 } from "./transactions.validator.js";
 import validateRequest from "../../middlewares/validateRequest.js";
 import {
@@ -14,8 +15,15 @@ import {
   getTransaction,
   updateTransaction,
   getSummary,
+  getYearlyReport,
 } from "./transactions.controller.js";
 router.get("/summary", getSummary);
+router.get(
+  "/reports/monthly",
+  monthlyReportValidator,
+  validateRequest,
+  getYearlyReport,
+);
 router.get("/", transactionQueryValidator, validateRequest, getTransactions);
 router.post("/", addTransactionValidator, validateRequest, addTransaction);
 router.delete(

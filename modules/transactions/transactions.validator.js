@@ -95,3 +95,11 @@ export const updateTransactionValidator = [
     .isLength({ max: 500 })
     .withMessage("Description is too long"),
 ];
+export const monthlyReportValidator = [
+  query("year")
+    .exists()
+    .withMessage("Year is required")
+    .bail()
+    .isInt({ min: 2000, max: 2100 })
+    .withMessage("Year must be between 2000 and 2100."),
+];

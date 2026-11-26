@@ -6,8 +6,7 @@ import {
   updateTransactionById,
   createTransaction,
   countTransactions,
-  getTotalIncome,
-  getTotalExpense,
+  getTotalByType,
 } from "./transactions.repository.js";
 import { validateActiveCategory } from "../categories/index.js";
 import Decimal from "decimal.js";
@@ -105,8 +104,8 @@ export async function updateTransactionService(
 }
 export async function getSummaryService(userId) {
   const [incomeResult, expenseResult] = await Promise.all([
-    getTotalIncome(userId),
-    getTotalExpense(userId),
+    getTotalByType(userId, "INCOME"),
+    getTotalByType(userId, "EXPENSE"),
   ]);
   const totalIncome = new Decimal(incomeResult._sum.amount ?? 0);
   const totalExpense = new Decimal(expenseResult._sum.amount ?? 0);
@@ -115,5 +114,38 @@ export async function getSummaryService(userId) {
     totalIncome: totalIncome.toFixed(2),
     totalExpense: totalExpense.toFixed(2),
     balance: balance.toFixed(2),
+  };
+}
+function getMonthDateRange(year, month) {
+  return {
+    startDate: new Date(Date.UTC(year, month - 1, 1)),
+    endDate: new Date(Date.UTC(year, month, 1)),
+  };
+}
+export async function getMonthlyReportService(userId, year, month) {
+  const { startDate, endDate } = getMonthDateRange(year, month);
+  const [incomeResult, expenseResult] = await Promise.all([
+    getTotalByType(userId, "INCOME", { startDate, endDate }),
+    getTotalByType(userId, "EXPENSE", { startDate, endDate }),
+  ]);
+  const totalIncome = new Decimal(incomeResult._sum.amount ?? 0);
+  const totalExpense = new Decimal(expenseResult._sum.amount ?? 0);
+  const balance = totalIncome.minus(totalExpense);
+  return {
+    month,
+    income: totalIncome.toFixed(2),
+    expense: totalExpense.toFixed(2),
+    balance: balance.toFixed(2),
+  };
+}
+export async function getYearlyReportService(userId, year) {
+  const months = Array.from({ length: 12 }, (_, index) => index + 1);
+  const result = months.map((month) =>
+    getMonthlyReportService(userId, year, month),
+  );
+  const report = await Promise.all(result);
+  return {
+    year,
+    months: report,
   };
 }
