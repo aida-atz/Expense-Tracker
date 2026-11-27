@@ -7,12 +7,14 @@ import helmet from "helmet";
 import protect from "./middlewares/auth.js";
 import { notFound, errorHandler } from "./controllers/errors.js";
 import { apiLimiter } from "./middlewares/rateLimiter.js";
-
+import "dotenv/config";
 const app = express();
 app.disable("x-powered-by");
 app.use(helmet());
 app.use(corsMiddleware);
-app.use(apiLimiter);
+if (process.env.NODE_ENV !== "test") {
+  app.use(apiLimiter);
+}
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use("/auth", authRouter);
